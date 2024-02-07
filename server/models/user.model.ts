@@ -1,8 +1,8 @@
 import { model, Schema } from 'mongoose';
-import { IUser } from '../interface/IUser';
+import { UserInterface } from '../interface/user.interface';
 import * as argon from 'argon2';
 
-const userSchema: Schema<IUser> = new Schema({
+const userSchema: Schema<UserInterface> = new Schema({
   userName: {
     type: String,
     required: true,
@@ -28,11 +28,12 @@ const userSchema: Schema<IUser> = new Schema({
   },
 });
 
-userSchema.pre('save', async function (this: IUser, next): Promise<void> {
+userSchema.pre('save', async function (this: UserInterface, next): Promise<void> {
   if (!this.isModified('password')) return next();
 
   try {
     this.password = await argon.hash(this.password.toString());
+    this.createdAt = new Date();
     next();
   } catch (error) {
     console.error(`[ERROR] ${error}`);
@@ -42,7 +43,7 @@ userSchema.pre('save', async function (this: IUser, next): Promise<void> {
 
 userSchema.pre(
   'findOneAndUpdate',
-  async function (this: { _update: IUser }, next): Promise<void> {
+  async function (this: { _update: UserInterface }, next): Promise<void> {
     if (!this._update || !this._update.password) return next();
 
     try {
@@ -57,6 +58,6 @@ userSchema.pre(
   },
 );
 
-const User = model<IUser>('User', userSchema);
+const UserModel = model<UserInterface>('UserModel', userSchema);
 
-export default User;
+export default UserModel;
