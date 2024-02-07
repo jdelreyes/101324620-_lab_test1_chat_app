@@ -6,6 +6,7 @@ const userSchema: Schema<UserInterface> = new Schema({
   userName: {
     type: String,
     required: true,
+    unique: true,
   },
   firstName: {
     type: String,
@@ -28,18 +29,21 @@ const userSchema: Schema<UserInterface> = new Schema({
   },
 });
 
-userSchema.pre('save', async function (this: UserInterface, next): Promise<void> {
-  if (!this.isModified('password')) return next();
+userSchema.pre(
+  'save',
+  async function (this: UserInterface, next): Promise<void> {
+    if (!this.isModified('password')) return next();
 
-  try {
-    this.password = await argon.hash(this.password.toString());
-    this.createdAt = new Date();
-    next();
-  } catch (error) {
-    console.error(`[ERROR] ${error}`);
-    return next(error);
-  }
-});
+    try {
+      this.password = await argon.hash(this.password.toString());
+      this.createdAt = new Date();
+      next();
+    } catch (error) {
+      console.error(`[ERROR] ${error}`);
+      return next(error);
+    }
+  },
+);
 
 userSchema.pre(
   'findOneAndUpdate',
