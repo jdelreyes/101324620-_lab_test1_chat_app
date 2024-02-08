@@ -1,24 +1,57 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import io from "socket.io-client";
+
+const socket = io("http://localhost:8000");
 
 function App() {
+  const [name, setName] = useState<any>("");
+  const [message, setMessage] = useState<any>("");
+  const [messages, setMessages] = useState<any[]>([]);
+
+  useEffect(() => {
+    const onMessage = (message: string) => {
+      setMessages((messages) => [...messages, message]);
+    };
+    socket.on("message", onMessage);
+
+    return () => {
+      socket.off("message", onMessage);
+    };
+  }, []);
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (name && message) {
+      socket.emit("sendMessage", { name, message });
+      setName("");
+      setMessage("");
+    }
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={name}
+          placeholder="Your name"
+          onChange={(event) => setName(event.target.value)}
+        />
+        <input
+          type="text"
+          value={message}
+          placeholder="Your message"
+          onChange={(event) => setMessage(event.target.value)}
+        />
+        <button type="submit">Send</button>
+      </form>
+      <ul>
+        {messages.map((message, index) => (
+          <li key={index}>
+            {message.name}: {message.message}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
