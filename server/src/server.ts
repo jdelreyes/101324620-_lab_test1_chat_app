@@ -51,6 +51,16 @@ io.on('connection', (socket) => {
     io.emit('message', message);
   });
 
+  socket.on('joinRoom', (room) => {
+    console.log(`User ${socket.id} joined room ${room}`);
+    socket.join(room);
+  });
+
+  socket.on("groupMessage", (data) => {
+    console.log(`User ${socket.id} sent message to room ${data.room} ${data.message}`);
+    io.to(data.room).emit("groupMessageClient", data.message);
+  });
+
   socket.on('disconnect', () => {
     console.log(`Socket ${socket.id} disconnected`);
   });

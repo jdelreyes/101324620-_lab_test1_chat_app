@@ -7,7 +7,5 @@ export const Login: FC = () => {
   const [password, setPassword] = useState<string>("");
   const [email, setEmail] = useState<string>("");
 
-  return <form>
-    
-  </form>
+  return <form></form>;
 };

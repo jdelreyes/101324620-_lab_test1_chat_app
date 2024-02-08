@@ -4,39 +4,48 @@ import io from "socket.io-client";
 const socket = io("http://localhost:8000");
 
 function App() {
-  const [name, setName] = useState<any>("");
-  const [message, setMessage] = useState<any>("");
-  const [messages, setMessages] = useState<any[]>([]);
+  const [message, setMessage] = useState<string>("");
+  const [messages, setMessages] = useState<string[]>([]);
+
+  const room: string | null = new URLSearchParams(document.location.search).get(
+    "room"
+  );
 
   useEffect(() => {
     const onMessage = (message: string) => {
       setMessages((messages) => [...messages, message]);
     };
-    socket.on("message", onMessage);
+    socket.on("groupMessageClient", onMessage);
 
     return () => {
-      socket.off("message", onMessage);
+      socket.off("groupMessageClient", onMessage);
     };
   }, []);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (name && message) {
-      socket.emit("sendMessage", { name, message });
-      setName("");
+    if (message && room) {
+      const data = {
+        room,
+        message,
+      };
+
+      socket.emit("joinRoom", room);
+      socket.emit("groupMessage", data);
       setMessage("");
     }
   };
 
   return (
     <div>
+      <div>Room: {room}</div>
+      <button
+        onClick={() => {
+          
+        }}
+      >
+      </button>
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={name}
-          placeholder="Your name"
-          onChange={(event) => setName(event.target.value)}
-        />
         <input
           type="text"
           value={message}
@@ -47,9 +56,7 @@ function App() {
       </form>
       <ul>
         {messages.map((message, index) => (
-          <li key={index}>
-            {message.name}: {message.message}
-          </li>
+          <li key={index}>{message}</li>
         ))}
       </ul>
     </div>
