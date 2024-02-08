@@ -16,3 +16,10 @@ const groupMessageSchema: Schema<GroupMessageInterface> = new Schema({
     default: Date.now(),
   },
 });
+
+const GroupMessageModel = model<GroupMessageInterface>(
+  'GroupMessageModel',
+  groupMessageSchema,
+);
+
+export default GroupMessageModel;
